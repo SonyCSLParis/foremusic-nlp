@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "foremusic"
+version = "0.1.0"
+description = ""
+authors = ["Inès Blin <ines.blin@sony.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.0.1"
+transformers = "^4.29.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
