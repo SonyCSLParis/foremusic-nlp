@@ -5,6 +5,7 @@ Filtering based on following criteria
 - removing if not english
 """
 import os
+import psutil
 import argparse
 import multiprocessing as mp
 from tqdm import tqdm
@@ -51,7 +52,7 @@ if __name__ == '__main__':
     f_output = open(os.path.join(args_main["output"], "stats.txt"), "w+", encoding="utf-8")
     DF_INPUT = main(df_input=DF_INPUT, f_write=f_output)
 
-    with mp.Pool(processes=8) as pool:
+    with mp.Pool(processes=psutil.cpu_count()) as pool:
         results = []
         for result in tqdm(pool.map(mp_func, DF_INPUT.lyrics.values),
                            total=DF_INPUT.shape[0]):
