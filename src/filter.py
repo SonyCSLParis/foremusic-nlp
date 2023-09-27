@@ -18,9 +18,8 @@ TOKENIZER = AutoTokenizer.from_pretrained(MODEL_NAME)
 MODEL = AutoModelForSequenceClassification.from_pretrained(MODEL_NAME)
 CLASSIFIER = TextClassificationPipeline(model=MODEL, tokenizer=TOKENIZER)
 
-def mp_func(text):
+def get_label(res):
     """ Classifying language """
-    res = CLASSIFIER(text, truncation=True, max_length=512)
     if res:
         return res[0]["label"]
     return "unknown"
@@ -52,16 +51,8 @@ if __name__ == '__main__':
     f_output = open(os.path.join(args_main["output"], "stats.txt"), "w+", encoding="utf-8")
     DF_INPUT = main(df_input=DF_INPUT, f_write=f_output)
 
-    with mp.Pool(processes=psutil.cpu_count()) as pool:
-        results = []
-        for result in tqdm(pool.map(mp_func, DF_INPUT.lyrics.values),
-                           total=DF_INPUT.shape[0]):
-            results.append(result)
-
-        pool.close()
-        pool.join()
-    
-    DF_INPUT["language"] = results
+    RESULTS = CLASSIFIER(DF_INPUT.lyrics.values)
+    DF_INPUT["language"] = [get_label(res) for res in RESULTS]
 
     print(f"Original size: {DF_INPUT.shape[0]}")
     f_output.write(f"Original size: {DF_INPUT.shape[0]}")
