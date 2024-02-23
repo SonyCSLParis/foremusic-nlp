@@ -12,8 +12,8 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
 
 # Load DS
-train_ds = Dataset.from_csv("data/modif/train_tl_1.csv")
-test_ds = Dataset.from_csv("data/modif/test_tl_1.csv")
+train_ds = Dataset.from_csv("data/2023_09_28/train.csv")
+eval_ds = Dataset.from_csv("data/2023_09_28/eval.csv")
 
 # Set Up
 BASE_MODEL = "xlm-roberta-base"
@@ -26,20 +26,21 @@ tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
 model = AutoModelForSequenceClassification.from_pretrained(BASE_MODEL, num_labels=1)
 
 # Prepare Datasets
-ds = {"train": train_ds.select(range(100)), "test": test_ds.select(range(10))}
+# ds = {"train": train_ds.select(range(100)), "eval": eval_ds.select(range(10))}
+ds = {"train": train_ds, "eval": eval_ds}
 
 def preprocess_function(examples):
     """ Pre-processing text and score """
     label = examples["yt_pop_d15"] 
-    examples = tokenizer(examples["lyrics"], truncation=True, padding="max_length", max_length=256)
+    examples = tokenizer(examples["pre_processed"], truncation=True, padding="max_length", max_length=256)
 
     # Change this to real number -> removed because already float
     examples["label"] = float(label)
     return examples
 
-# remove_columns = ['Unnamed: 0', 'track_id', 'start_date', 'release_date', 'artist_id', 'artist_name', 'album_id', 'album_name', 'ytv_ref', 'ytc_id', 'db_country', 'lyrics', 'train_test']
+remove_columns = ['Unnamed: 0', 'track_id', 'start_date', 'release_date', 'artist_id', 'artist_name', 'album_id', 'album_name', 'ytv_ref', 'ytc_id', 'db_country', 'lyrics', 'train_eval_test']
 for split in ds:
-    ds[split] = ds[split].map(preprocess_function, remove_columns=[])
+    ds[split] = ds[split].map(preprocess_function, remove_columns=remove_columns)
 
 def compute_metrics_for_regression(eval_pred):
     logits, labels = eval_pred
@@ -82,7 +83,7 @@ trainer = RegressionTrainer(
     model=model,
     args=training_args,
     train_dataset=ds["train"],
-    eval_dataset=ds["test"],
+    eval_dataset=ds["eval"],
     compute_metrics=compute_metrics_for_regression,
 )
 

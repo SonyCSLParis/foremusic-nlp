@@ -8,10 +8,12 @@ import pandas as pd
 
 def main(df_input, folder_output):
     """ Separating based on train/test set """
-    train = df_input[df_input.train_test == "train"]
-    test = df_input[df_input.train_test == "test"]
+    train = df_input[df_input.train_eval_test == "train"]
+    eval_ = df_input[df_input.train_eval_test == "eval"]
+    test = df_input[df_input.train_eval_test == "test"]
     
     train.to_csv(os.path.join(folder_output, "train.csv"))
+    eval_.to_csv(os.path.join(folder_output, "eval.csv"))
     test.to_csv(os.path.join(folder_output, "test.csv"))
 
 if __name__ == '__main__':

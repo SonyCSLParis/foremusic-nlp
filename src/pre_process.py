@@ -14,21 +14,28 @@ class PreProcessor:
         # regexes to remove parts that indicate which part (singer/chorus, etc) is singing
         self.regex_parts = re.compile("\\[.+\\]", re.MULTILINE)
         # listing
-        self.listing = re.compile("(\\d+\\..+(\\n|))+", re.MULTILINE)
+        self.listing_1 = re.compile("(\\d+\\..+(\\n|))+", re.MULTILINE)
+        self.listing_2 = re.compile(".+\s-\s.+\n", re.MULTILINE)
         # dates at the end
         self.dates_end = re.compile(".+\\s\\((January|February|March|April|May|June|July|August|September|October|November|December)\\s\\d{1,2},\\s\\d{4}\\)", re.MULTILINE)
         # date list: 2020\n list of songs (repeated)
         self.dates_list = re.compile("(\\d{4}\\s(.+\\s)+)+", re.MULTILINE)
         # playlist
         self.playlist = re.compile(".+(of|from) the Playlist", re.MULTILINE)
+        # nb Contributor
+        self.contributor = re.compile("\d+ Contributor.+", re.MULTILINE)
+
 
         self.replace = [("↗", "")]
         self.pipeline = [
             self.remove_parts,
-            lambda text: self.remove_simple(text, self.listing),
+            lambda text: self.remove_simple(text, self.listing_1),
+            lambda text: self.remove_simple(text, self.listing_2),
             lambda text: self.remove_simple(text, self.dates_end),
             lambda text: self.remove_simple(text, self.dates_list),
-            lambda text: self.remove_simple(text, self.playlist)]
+            lambda text: self.remove_simple(text, self.playlist),
+            lambda text: self.remove_simple(text, self.contributor)
+        ]
         self.matches = []
 
     def remove_parts(self, text):
