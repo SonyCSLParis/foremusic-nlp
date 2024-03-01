@@ -139,8 +139,11 @@ def main(input, folder):
         data_collator=DATA_COLLATOR,
         tokenizer=TOKENIZER
     )
+    eval_results = trainer.evaluate()
+    print(f">>> Perplexity: {math.exp(eval_results['eval_loss']):.2f}")
     trainer.train()
-    trainer.evaluate()
+    eval_results = trainer.evaluate()
+    print(f">>> Perplexity: {math.exp(eval_results['eval_loss']):.2f}")
 
 
 if __name__ == '__main__':

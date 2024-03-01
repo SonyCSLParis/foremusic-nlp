@@ -1,6 +1,6 @@
 **/.DS_Store
-data/
-models/
+./data/
+./models/
 *.csv
 build/
 dist/
