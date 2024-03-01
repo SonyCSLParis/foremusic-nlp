@@ -1,8 +1,10 @@
 **/.DS_Store
-./data/
-./models/
 *.csv
 build/
 dist/
 *.egg-info
 logs/
+data/*
+misc/*
+embeddings/*
+models_old/

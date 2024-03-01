@@ -24,12 +24,12 @@ def get_label(res):
         return res["label"]
     return "unknown"
 
-def main(df_input, f_write):
+def main(df_input, f_write, target):
     """ Main filtering """
     print(f"{df_input.shape[0]}: original")
     f_write.write(f"{df_input.shape[0]}: original\n")
     df_input = df_input.fillna("")
-    non_empty_col = ["pre_processed", "yt_pop_d15"]
+    non_empty_col = ["pre_processed", target]
     for col in non_empty_col:
         df_input = df_input[df_input[col] != ""]
         print(f"{df_input.shape[0]}: after removing empty {col}")
@@ -39,17 +39,19 @@ def main(df_input, f_write):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument('-i', "--input", required=False,
+    ap.add_argument('-i', "--input", required=True,
                     help=".csv file with info")
-    ap.add_argument('-o', "--output", required=False,
+    ap.add_argument('-o', "--output", required=True,
                     help="output folder for saving")
+    ap.add_argument('-t', "--target", required=True,
+                    help="target variable to predict")
     args_main = vars(ap.parse_args())
 
     DF_INPUT = pd.read_csv(args_main["input"])
     DF_INPUT = DF_INPUT[[col for col in DF_INPUT.columns if col != "Unnamed: 0"]]
 
     f_output = open(os.path.join(args_main["output"], "stats.txt"), "w+", encoding="utf-8")
-    DF_INPUT = main(df_input=DF_INPUT, f_write=f_output)
+    DF_INPUT = main(df_input=DF_INPUT, f_write=f_output, target=args_main["target"])
 
     INPUT_LIST = list(DF_INPUT.lyrics.values)
 

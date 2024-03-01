@@ -68,7 +68,11 @@ if __name__ == '__main__':
                     help="output file for saving")
     args_main = vars(ap.parse_args())
 
-    DF_ = pd.read_csv(args_main["path"]).fillna("")
+    DF_ = pd.read_csv(args_main["path"])
+    print(DF_.shape)
+    DF_ = DF_[(~DF_.yt_pop_d15.isna()) & (~DF_.sp_pop_d15.isna())]
+    DF_ = DF_.fillna("")
+    print(DF_.shape)
     PRE_PROCESSOR = PreProcessor()
     tqdm.pandas()
     DF_["pre_processed"] = DF_[args_main["col"]].progress_apply(PRE_PROCESSOR)

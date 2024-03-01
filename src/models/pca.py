@@ -31,16 +31,19 @@ def main(config):
     embeddings = get_embeddings(model=model, tokenizer=tokenizer, sentences=df.pre_processed.values.tolist(), batch_size=BATCH_SIZE)
 
 
-    np.save(os.path.join(config["save_folder"], "before_pca_embeddings.npy"), embeddings)
+    np.save(os.path.join(config["save_folder"], f"before_pca_{config['type_data']}_embeddings.npy"), embeddings)
 
     pca = PCA(n_components=N_COMPONENTS)
     pca.fit(embeddings)
+    embeddings = pca.transform(embeddings)
+    np.save(os.path.join(config["save_folder"], f"after_pca_{config['type_data']}_embeddings.npy"), embeddings)
 
     dump(pca, os.path.join(config["save_folder"], "pca_model.joblib"))
 
 
 if __name__ == '__main__':
-    # python src/models/pca.py -bt xlm-roberta-base -bm models/roberta-fine-tuned-regression/checkpoint-7200  -d data/2023_09_28/train.csv -sf test
+    # python src/models/pca.py -bt xlm-roberta-base -bm models/roberta-fine-tuned-regression/checkpoint-7200  -d data/2023_09_28/train.csv -embeddings/regression -td train
+    # python src/models/pca.py -bt xlm-roberta-base -bm final_models/mlm-fine-tuned-roberta/checkpoint-9000 -d data/2023_09_28/train.csv -sf embeddings/roberta_fine_tuned -td train
     ap = argparse.ArgumentParser()
     ap.add_argument('-bt', '--base_tokenizer', required=True,
                     help='base tokenizer for model')
@@ -50,7 +53,11 @@ if __name__ == '__main__':
                     help='data to train the PCA')
     ap.add_argument('-sf', '--save_folder', required=True,
                     help='save_folder')
+    ap.add_argument('-td', '--type_data', required=True,
+                    help='type data, to be added in embeddings file names')
     args_main = vars(ap.parse_args())
+    if not os.path.exists(args_main["save_folder"]):
+        os.makedirs(args_main["save_folder"])
     with open(os.path.join(args_main["save_folder"], "config_pca.json"), "w") as f:
-        json.dump(args_main, f)
+        json.dump(args_main, f, indent=4)
     main(config=args_main)

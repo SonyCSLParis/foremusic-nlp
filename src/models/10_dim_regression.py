@@ -11,15 +11,7 @@ from types import NoneType
 from transformers import AutoTokenizer, AutoModel, Trainer, TrainingArguments, PreTrainedModel
 import torch
 import torch.nn as nn
-
-def preprocess_function(examples):
-    """ Pre-processing text and score """
-    label = examples["yt_pop_d15"] 
-    examples = tokenizer(examples["pre_processed"], truncation=True, padding="max_length", max_length=256)
-
-    # Change this to real number -> removed because already float
-    examples["label"] = float(label)
-    return examples
+from src.helpers import get_data
 
 
 class DimensionReductionRegressionHFModel(nn.Module):
@@ -103,10 +95,11 @@ class DimensionReductionRegressionModel:
         # print(eval_results)
 
 @click.command()
-@click.option("--train", help="Path to training dataset")
-@click.option("--eval", help="Path to evaluation dataset")
+@click.option("--train_path", help="Path to training dataset")
+@click.option("--eval_path", help="Path to evaluation dataset")
 @click.option("--config", help="Config path with parameters")
-def main(train_path, eval_path, config):
+@click.option("--target", help="Target variable to predict")
+def main(train_path, eval_path, config, target):
     """ Main to train 10-dim regression model """
     # Load model
     with open(config, "r") as f:
@@ -116,11 +109,11 @@ def main(train_path, eval_path, config):
      # Load DS + Config
     train_ds = Dataset.from_csv(train_path)
     eval_ds = Dataset.from_csv(eval_path)
-    dataset = get_data(reg_model.tokenizer, train_ds, eval_ds)
+    dataset = get_data(reg_model.tokenizer, train_ds, eval_ds, target)
 
     return
 
 
 if __name__ == '__main__':
-    # python src/models/regression.py --train data/2023_09_28/train.csv --eval data/2023_09_28/eval.csv --config src/configs/base_10_dim_regression.yaml
+    # python src/models/regression.py --train data/2023_09_28/train.csv --eval data/2023_09_28/eval.csv --config src/configs/base_10_dim_regression.yaml --target sp_pop_d15
     main()

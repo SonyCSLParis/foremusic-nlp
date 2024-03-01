@@ -1,4 +1,4 @@
-base_model: "xlm-roberta-base"
+base_model: "./models/mlm-fine-tuned-roberta/checkpoint-9000"
 learning_rate: 0.00002
 max_length: 256
 batch_size: 16
@@ -9,4 +9,4 @@ save_total_limit: 2
 metric_for_best_model: "mse"
 load_best_model_at_end: True
 weight_decay: 0.01
-output_dir: "./models/roberta-fine-tuned-regression"
+output_dir: "./final_models/roberta-fine-tuned-regression"

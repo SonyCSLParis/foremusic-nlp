@@ -147,6 +147,7 @@ def main(input, folder):
 
 
 if __name__ == '__main__':
+    # python src/models/fine_tune_llm.py --input data/2024_03_01/filtered.csv --folder final_models/mlm-fine-tuned-roberta
     ap = argparse.ArgumentParser()
     ap.add_argument('-i', "--input", required=False,
                     help=".csv file with data for fine-tuning")

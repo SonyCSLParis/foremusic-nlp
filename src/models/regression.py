@@ -84,7 +84,8 @@ class RegressionModel:
 @click.option("--train_path", help="Path to training dataset")
 @click.option("--eval_path", help="Path to evaluation dataset")
 @click.option("--config", help="Config path with parameters")
-def main(train, eval, config):
+@click.option("--target", help="Target variable to predict")
+def main(train_path, eval_path, config, target):
     """ Main to train regression model """
     # Load model
     with open(config, "r") as f:
@@ -94,7 +95,7 @@ def main(train, eval, config):
     # Load DS
     train_ds = Dataset.from_csv(train_path)
     eval_ds = Dataset.from_csv(eval_path)
-    dataset = get_data(reg_model.tokenizer, train_ds, eval_ds)
+    dataset = get_data(reg_model.tokenizer, train_ds, eval_ds, target)
 
     reg_model.train(dataset=dataset)
 
