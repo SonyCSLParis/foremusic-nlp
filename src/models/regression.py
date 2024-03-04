@@ -55,7 +55,7 @@ class RegressionModel:
         self.training_args = self.get_training_args()
 
     
-    def get_training_args():
+    def get_training_args(self):
         return TrainingArguments(
             output_dir=self.config["output_dir"],
             learning_rate=self.config["learning_rate"],
@@ -101,5 +101,6 @@ def main(train_path, eval_path, config, target):
 
 
 if __name__ == '__main__':
-    # python src/models/regression.py --train data/2023_09_28/train.csv --eval data/2023_09_28/eval.csv --config src/configs/base_regression.yaml
+    # python src/models/regression.py --train_path data/2024_03_01/train.csv --eval_path data/2024_03_01/eval.csv --config src/configs/base_regression_sp.yaml --target sp_pop_d15
+    # python src/models/regression.py --train_path data/2024_03_01/train.csv --eval_path data/2024_03_01/eval.csv --config src/configs/base_regression_yt.yaml --target yt_pop_d15
     main()

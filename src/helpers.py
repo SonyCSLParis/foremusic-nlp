@@ -29,7 +29,7 @@ def get_data(tokenizer, train_ds, eval_ds, target):
 
 def check_config(keys, config):
     """ Check that all parameters are here """
-    if any(x not in keysg for x in keys):
+    if any(x not in config for x in keys):
         raise ValueError(f"All the following elements must be in config: {keys}")
 
 def get_embeddings(model, tokenizer, sentences, batch_size: int = 16):
@@ -39,12 +39,19 @@ def get_embeddings(model, tokenizer, sentences, batch_size: int = 16):
     for i in tqdm(range(0, nb_batch)):
         batch_sentences = sentences[i*batch_size:(i+1)*batch_size]
         batch_sentences = tokenizer(batch_sentences, padding=True, truncation=True, return_tensors="pt")
-        input_ids = batch_sentences["input_ids"].to(DEVICE)
-
-        with torch.no_grad():
-            outputs = model(input_ids)
-        embeddings = outputs.last_hidden_state
-        embeddings = torch.mean(embeddings, dim=1).cpu().numpy()
+        if "DimensionReductionRegressionHFModel" in str(type(model)):
+            input_ids = batch_sentences.to(DEVICE)
+            with torch.no_grad():
+                outputs = model(**input_ids)
+        else:
+            input_ids = batch_sentences["input_ids"].to(DEVICE)
+            with torch.no_grad():
+                outputs = model(input_ids)
+        embeddings = outputs['last_hidden_state']
+        if len(embeddings.shape) == 2:
+            embeddings = embeddings.cpu().numpy()
+        else:
+            embeddings = torch.mean(embeddings, dim=1).cpu().numpy()
         res.append(embeddings)
 
     # Concatenate the batches

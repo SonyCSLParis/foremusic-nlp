@@ -7,6 +7,7 @@ NB: load tokenizer before model
 export CUDA_VISIBLE_DEVICES=0 (GPU imbalance)
 """
 import os
+import math
 import collections
 import argparse
 from datetime import datetime
@@ -40,8 +41,8 @@ def split_train_test(dataset):
 
 
 def tokenize_function(examples):
-    # result = TOKENIZER(examples["pre_processed"], truncation=True, padding="max_length", max_length=256)
-    result = TOKENIZER(examples["pre_processed"])
+    result = TOKENIZER(examples["pre_processed"], truncation=True, padding="max_length", max_length=512)
+    # result = TOKENIZER(examples["pre_processed"])
     if TOKENIZER.is_fast:
         result["word_ids"] = [result.word_ids(i) for i in range(len(result["input_ids"]))]
     return result
@@ -112,16 +113,13 @@ def main(input, folder):
     # Prep for training: tokenizing, chunking
     tokenized_datasets = ds.map(
         tokenize_function, batched=True, remove_columns=remove_columns)
-    print(TOKENIZER.model_max_length)
-    print(tokenized_datasets)
     lm_datasets = tokenized_datasets.map(group_texts, batched=True)
-    print(lm_datasets)
 
     # Training Arguments + Trainer
     batch_size = 64
     logging_steps = len(lm_datasets["train"]) // batch_size
     training_args = TrainingArguments(
-        output_dir="./models/mlm-fine-tuned-roberta",
+        output_dir="./final_models/mlm-fine-tuned-roberta",
         overwrite_output_dir=True,
         evaluation_strategy="epoch",
         learning_rate=2e-5,
@@ -130,7 +128,10 @@ def main(input, folder):
         per_device_eval_batch_size=batch_size,
         fp16=True,
         logging_steps=logging_steps,
+        save_strategy="epoch",
+        save_total_limit=2
     )
+    
     trainer = Trainer(
         model=MODEL,
         args=training_args,
@@ -156,6 +157,9 @@ if __name__ == '__main__':
     # ap.add_argument('-m', "--model", required=False,
     #                 help="pre-trained model name")
     args_main = vars(ap.parse_args())
+
+    if not os.path.exists(args_main["folder"]):
+        os.makedirs(args_main["folder"])
 
     start_time = datetime.now()
     main(input=args_main["input"], folder=args_main["folder"])

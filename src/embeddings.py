@@ -2,6 +2,7 @@
 """ 
 Saving embeddings from trained models
 """
+import os
 import click
 import math
 import torch
@@ -11,6 +12,7 @@ import numpy as np
 import pandas as pd
 from transformers import AutoTokenizer, AutoModel
 from src.helpers import get_embeddings
+from src.models.ten_dim_regression import DimensionReductionRegressionHFModel
 
 def read_csv(path: str) -> pd.DataFrame:
     """ Opening pandas, removing "Unnamed: 0" column """
@@ -31,10 +33,14 @@ BATCH_SIZE = 16
 @click.option("--base_model", help="Base model to get embeddings")
 @click.option("--data", help="Path to .csv data to embed")
 @click.option("--save", help="Save path for embeddings, in .npy format")
-@click.option("--pca", help="PCA path model, a .joblib file")
+@click.option("--pca_model", help="PCA path model, a .joblib file")
 def main(base_model, data, save, pca_model=None):
     tokenizer = AutoTokenizer.from_pretrained(BASE_TOKENIZER)
-    model = AutoModel.from_pretrained(base_model)
+    
+    if base_model.endswith(".pth"):
+        model = torch.load(base_model)
+    else:
+        model = AutoModel.from_pretrained(base_model)
     df = read_csv(data)
 
     
@@ -45,6 +51,10 @@ def main(base_model, data, save, pca_model=None):
     if pca_model:
         pca = load(pca_model)
         embeddings = pca.transform(embeddings) 
+
+    save_folder = "/".join(save.split("/")[:-1])
+    if not os.path.exists(save_folder):
+        os.makedirs(save_folder)
     np.save(save, embeddings)
 
 

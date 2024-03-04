@@ -5,18 +5,20 @@ Fine-tuned model for regression, adding two layers
 - regression
 """
 import os
+import yaml
+import click
 import torch
 from datasets import Dataset
 from types import NoneType
 from transformers import AutoTokenizer, AutoModel, Trainer, TrainingArguments, PreTrainedModel
 import torch
 import torch.nn as nn
-from src.helpers import get_data
+from src.helpers import get_data, check_config
 
 
 class DimensionReductionRegressionHFModel(nn.Module):
     def __init__(self, base_model, output_embedding_shape: int = 10):
-        super(DimensionReductionRegressionModel, self).__init__()
+        super(DimensionReductionRegressionHFModel, self).__init__()
         self.base_model = base_model
         self.dropout = nn.Dropout(0.1)  # You can adjust dropout rate if needed
         self.dim_reduction_layer = nn.Linear(base_model.config.hidden_size, output_embedding_shape)
@@ -64,9 +66,9 @@ class DimensionReductionRegressionModel:
         self.model = DimensionReductionRegressionHFModel(self.model_auto)
         self.model.to(self.device)
 
-        self.training_args = self.get_training_args
+        self.training_args = self.get_training_args()
     
-    def get_training_args():
+    def get_training_args(self):
         return TrainingArguments(
             output_dir=self.config["output_dir"],
             learning_rate=self.config["learning_rate"],
@@ -84,8 +86,8 @@ class DimensionReductionRegressionModel:
         trainer = Trainer(
             model=self.model,
             args=self.training_args,
-            train_dataset=ds["train"],
-            eval_dataset=ds["eval"],
+            train_dataset=dataset["train"],
+            eval_dataset=dataset["eval"],
         )
         trainer.train()
         torch.save(trainer.model, os.path.join(self.config["output_dir"], "model_10_dim_reg.pth"))
@@ -111,7 +113,7 @@ def main(train_path, eval_path, config, target):
     eval_ds = Dataset.from_csv(eval_path)
     dataset = get_data(reg_model.tokenizer, train_ds, eval_ds, target)
 
-    return
+    reg_model.train(dataset=dataset)
 
 
 if __name__ == '__main__':
