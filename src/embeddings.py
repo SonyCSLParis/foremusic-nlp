@@ -33,8 +33,8 @@ BATCH_SIZE = 16
 @click.option("--base_model", help="Base model to get embeddings")
 @click.option("--data", help="Path to .csv data to embed")
 @click.option("--save", help="Save path for embeddings, in .npy format")
-@click.option("--pca_model", help="PCA path model, a .joblib file")
-def main(base_model, data, save, pca_model=None):
+@click.option("--dim_red_model", help="Dimensionality reduction path model, a .joblib file")
+def main(base_model, data, save, dim_red_model=None):
     tokenizer = AutoTokenizer.from_pretrained(BASE_TOKENIZER)
     
     if base_model.endswith(".pth"):
@@ -48,9 +48,9 @@ def main(base_model, data, save, pca_model=None):
     torch.cuda.empty_cache()
     embeddings = get_embeddings(model=model, tokenizer=tokenizer, sentences=df.pre_processed.values.tolist(), batch_size=BATCH_SIZE)
 
-    if pca_model:
-        pca = load(pca_model)
-        embeddings = pca.transform(embeddings) 
+    if dim_red_model:
+        dim_red = load(dim_red_model)
+        embeddings = dim_red.transform(embeddings) 
 
     save_folder = "/".join(save.split("/")[:-1])
     if not os.path.exists(save_folder):

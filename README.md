@@ -64,7 +64,7 @@ Assuming original data, stored as `table_lyrics_with_eval.csv`, is stored in `da
 python src/data_prep/pre_process.py --path data/2024_03_01/table_lyrics_with_eval.csv -c lyrics -o data/2024_03_01/pre_processed.csv
 ```
 
-2. Adding language with transformer-based model
+2. Filtering + Adding language with transformer-based model
 ```bash
 python src/data_prep/filter.py --input data/2024_03_01/pre_processed.csv --output data/2024_03_01/
 ```

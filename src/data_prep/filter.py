@@ -34,8 +34,24 @@ def main(df_input, f_write):
         df_input = df_input[df_input[col] != ""]
         print(f"{df_input.shape[0]}: after removing empty {col}")
         f_write.write(f"{df_input.shape[0]}: after removing empty {col}\n")
+    
+    # Checking if lyrics are unique per track_id > 
+    # if not, assuming the lyrics are not well extracted
+    df_input.pre_processed = df_input.pre_processed.apply(lambda x: x.replace("Embed", ""))
+    grouped = df_input.groupby("pre_processed").agg({"track_id": "count"}).sort_values(by="track_id", ascending=False)
+    grouped = grouped.reset_index().rename(columns={"track_id": "same_lyrics_count"})
+    df_merged = pd.merge(df_input, grouped, on="pre_processed", how="left")
+    df_filter = df_merged[df_merged.same_lyrics_count == 1].fillna("")
+    print(f"{df_filter.shape[0]}: after removing duplicated lyrics\n")
+    f_write.write(f"{df_filter.shape[0]}: after removing duplicated lyrics\n")
 
-    return df_input
+    df_filter = df_filter[df_filter.pre_processed != ""]
+    df_filter["lyrics_len"] = df_filter['pre_processed'].apply(len)
+    df_filter = df_filter[df_filter.lyrics_len >= 500]
+    print(f"{df_filter.shape[0]}: after removing lyrics with less than 500 characters\n")
+    f_write.write(f"{df_filter.shape[0]}: after removing lyrics with less than 500 characters\n")
+    
+    return df_filter
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
