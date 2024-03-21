@@ -19,7 +19,7 @@ from transformers import AutoTokenizer, AutoModelForMaskedLM, DataCollatorForLan
 from transformers import default_data_collator
 
 
-MODEL_NAME = "xlm-roberta-base"
+MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 TOKENIZER = AutoTokenizer.from_pretrained(MODEL_NAME)
 MODEL = AutoModelForMaskedLM.from_pretrained(MODEL_NAME)
 DATA_COLLATOR = DataCollatorForLanguageModeling(tokenizer=TOKENIZER, mlm_probability=0.15)
@@ -119,7 +119,7 @@ def main(input, folder):
     batch_size = 64
     logging_steps = len(lm_datasets["train"]) // batch_size
     training_args = TrainingArguments(
-        output_dir="./final_models/mlm-fine-tuned-roberta",
+        output_dir="./final_models/ft_st_all_mpnet_base_v2",
         overwrite_output_dir=True,
         evaluation_strategy="epoch",
         learning_rate=2e-5,
@@ -148,7 +148,7 @@ def main(input, folder):
 
 
 if __name__ == '__main__':
-    # python src/models/fine_tune_llm.py --input data/2024_03_01/filtered.csv --folder final_models/mlm-fine-tuned-roberta
+    # python src/models/fine_tune_llm.py --input data/2024_03_11/filtered.csv --folder final_models/st_all_mpnet_base_v2
     ap = argparse.ArgumentParser()
     ap.add_argument('-i', "--input", required=False,
                     help=".csv file with data for fine-tuning")

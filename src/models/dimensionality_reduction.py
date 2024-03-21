@@ -2,6 +2,7 @@
 """ 
 Fine-tuned model for regression, on the n-shaped embeddings
 """
+import re
 import os
 import json
 import math
@@ -21,6 +22,11 @@ DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 BATCH_SIZE = 64
 N_COMPONENTS = 10
 
+def remove_digits_at_end(input_string):
+    pattern = r'\d+$'
+    result = re.sub(pattern, '', input_string)
+    return result
+
 
 def main(config):
     models = ["pca", "umap"]
@@ -33,22 +39,23 @@ def main(config):
 
     model.to(DEVICE)
     torch.cuda.empty_cache()
-    embeddings = get_embeddings(model=model, tokenizer=tokenizer, sentences=df.pre_processed.values.tolist(), batch_size=BATCH_SIZE)
+    sentences = [remove_digits_at_end(x) for x in df.pre_processed.values.tolist()]
+    embeddings = get_embeddings(model=model, tokenizer=tokenizer, sentences=sentences, batch_size=BATCH_SIZE)
 
 
     np.save(os.path.join(config["save_folder"], f"before_{type_model}_{config['type_data']}_embeddings.npy"), embeddings)
 
-    if type_model == "pca":
-        dim_red_model = PCA(n_components=N_COMPONENTS)
-        dim_red_model.fit(embeddings)
-        embeddings = dim_red_model.transform(embeddings)
-    else:  # type_model == "umap"
-        dim_red_model = umap.UMAP(n_components=N_COMPONENTS)
-        embeddings = dim_red_model.fit_transform(embeddings)
+    # if type_model == "pca":
+    #     dim_red_model = PCA(n_components=N_COMPONENTS)
+    #     dim_red_model.fit(embeddings)
+    #     embeddings = dim_red_model.transform(embeddings)
+    # else:  # type_model == "umap"
+    #     dim_red_model = umap.UMAP(n_components=N_COMPONENTS)
+    #     embeddings = dim_red_model.fit_transform(embeddings)
 
-    np.save(os.path.join(config["save_folder"], f"after_{type_model}_{config['type_data']}_embeddings.npy"), embeddings)
+    # np.save(os.path.join(config["save_folder"], f"after_{type_model}_{config['type_data']}_embeddings.npy"), embeddings)
 
-    dump(dim_red_model, os.path.join(config["save_folder"], f"{type_model}_model.joblib"))
+    # dump(dim_red_model, os.path.join(config["save_folder"], f"{type_model}_model.joblib"))
 
 
 if __name__ == '__main__':

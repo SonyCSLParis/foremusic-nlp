@@ -101,6 +101,6 @@ def main(train_path, eval_path, config, target):
 
 
 if __name__ == '__main__':
-    # python src/models/regression.py --train_path data/2024_03_01/train.csv --eval_path data/2024_03_01/eval.csv --config src/configs/base_regression_sp.yaml --target sp_pop_d15
-    # python src/models/regression.py --train_path data/2024_03_01/train.csv --eval_path data/2024_03_01/eval.csv --config src/configs/base_regression_yt.yaml --target yt_pop_d15
+    # python src/models/regression.py --train_path data/2024_03_11/train.csv --eval_path data/2024_03_11/eval.csv --config src/configs/base_regression_sp.yaml --target sp_pop_d15
+    # python src/models/regression.py --train_path data/2024_03_11/train.csv --eval_path data/2024_03_01/eval.csv --config src/configs/base_regression_yt.yaml --target yt_pop_d15
     main()

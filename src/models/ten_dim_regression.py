@@ -53,7 +53,7 @@ class DimensionReductionRegressionHFModel(nn.Module):
 
 class DimensionReductionRegressionModel:
     """ model """
-    def __init__(self, config):
+    def __init__(self, config, output_embedding_shape: int = 10):
         self.keys_config = ["base_model", "learning_rate", "per_device_train_batch_size", "per_device_eval_batch_size", "num_train_epochs", "evaluation_strategy", "save_strategy", "save_total_limit", "logging_dir", "load_best_model_at_end", "output_dir"]
         check_config(keys=self.keys_config, config=config)
         self.config = config
@@ -63,7 +63,7 @@ class DimensionReductionRegressionModel:
         self.model_auto = AutoModel.from_pretrained(self.base_model)
 
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = DimensionReductionRegressionHFModel(self.model_auto)
+        self.model = DimensionReductionRegressionHFModel(self.model_auto, output_embedding_shape=output_embedding_shape)
         self.model.to(self.device)
 
         self.training_args = self.get_training_args()

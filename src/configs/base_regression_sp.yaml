@@ -1,4 +1,4 @@
-base_model: "./final_models/mlm-fine-tuned-roberta/checkpoint-1107"
+base_model: "sentence-transformers/all-mpnet-base-v2"
 learning_rate: 0.00002
 max_length: 256
 batch_size: 16
@@ -9,4 +9,4 @@ save_total_limit: 2
 metric_for_best_model: "mse"
 load_best_model_at_end: True
 weight_decay: 0.01
-output_dir: "./final_models/roberta-fine-tuned-regression-sp"
+output_dir: "./final_models/st_all_mpnet_base_v2_ft_regression"
