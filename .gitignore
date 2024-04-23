@@ -8,3 +8,5 @@ data/*
 misc/*
 embeddings/*
 models_old/
+final_embeddings
+final_models

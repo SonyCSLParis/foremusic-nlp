@@ -1,12 +1,12 @@
+# -*- coding: utf-8 -*-
+""" 
+Training and storing the models with a dimensionality reduction layer
+"""
 import yaml
 import click
 from datasets import Dataset
 from src.helpers import get_data
 from src.models.ten_dim_regression import DimensionReductionRegressionModel
-
-TRAIN_DATA = "./data/2024_03_11/train.csv"
-EVAL_DATA = "./data/2024_03_11/eval.csv"
-TARGET = "sp_pop_d15"
 
 CONFIG_BASE = {
     "learning_rate": 0.00002,
@@ -20,19 +20,9 @@ CONFIG_BASE = {
     "load_best_model_at_end": True
 }
 
-def main(train_path, eval_path, config, shape, target):
-    """ Main to train n-dim regression model """
-    reg_model = DimensionReductionRegressionModel(config=config, output_embedding_shape=shape)
-
-     # Load DS + Config
-    train_ds = Dataset.from_csv(train_path)
-    eval_ds = Dataset.from_csv(eval_path)
-    dataset = get_data(reg_model.tokenizer, train_ds, eval_ds, target)
-
-    reg_model.train(dataset=dataset)
-
 
 def get_output_dir(base_model, shape):
+    """ Output save folder to save models """
     if base_model.startswith("./final_models"):
         llm = "ft_st_all_mpnet_base_v2"
     else:
@@ -40,14 +30,32 @@ def get_output_dir(base_model, shape):
     return f"./final_models/{llm}_dim_reduction_{shape}_ft_regression"
 
 
-
-if __name__ == "__main__":
-    for base_model in ["sentence-transformers/all-mpnet-base-v2", "./final_models/ft_st_all_mpnet_base_v2/checkpoint-948"]:
+@click.command()
+@click.argument('train_data')
+@click.argument('eval_data')
+@click.argument('target')
+def main(train_data, eval_data, target, checkpoint):
+    # two base models: base model, fine-tuned model
+    for base_model in ["sentence-transformers/all-mpnet-base-v2", f"./final_models/ft_st_all_mpnet_base_v2/{checkpoint}"]:
+        # 4 embeddings size
         for shape in [5, 10, 20, 30]:
             config = CONFIG_BASE
             config["base_model"] = base_model
             config["output_dir"] = get_output_dir(base_model, shape)
             try:
-                main(train_path=TRAIN_DATA, eval_path=EVAL_DATA, config=config, shape=shape, target=TARGET)
+                # Train n-dim regression model
+                reg_model = DimensionReductionRegressionModel(config=config, output_embedding_shape=shape)
+
+                # Load DS + Config
+                train_ds = Dataset.from_csv(train_data)
+                eval_ds = Dataset.from_csv(eval_data)
+                dataset = get_data(reg_model.tokenizer, train_ds, eval_ds, target)
+
+                reg_model.train(dataset=dataset)
             except:
                 pass
+
+
+if __name__ == "__main__":
+    # python experiments/run_dim_red.py ./data/2024_03_11/train.csv ./data/2024_03_11/eval.csv sp_pop_d15 checkpoint-948
+    main()

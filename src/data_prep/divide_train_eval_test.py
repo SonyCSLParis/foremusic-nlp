@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Separating training and testing set
+Splitting data (train/eval/test) into separate files
 """
 import os
 import argparse

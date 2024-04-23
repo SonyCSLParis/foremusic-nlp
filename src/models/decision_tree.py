@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """ 
-Decision Tree model
+Vanilla Decision Tree (not important at the moment, cf. notebook for final models)
 """
 import click
 import numpy as np

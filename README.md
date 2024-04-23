@@ -1,175 +1,35 @@
-pip install torch torchvision torchaudio
+# Lyrics for success: comparing stylometric and embedding features for song popularity prediction
 
+This is the code that was submitted together with the paper at ISMIR 2024.
 
-language
-pre-process text: remove [couplet 1], list 1. 2. 3., 2018\n <text>
-embedding
-(embedding + kg information?)
-additional layer to reduce # of dimensions
-training
+## Set Up a virtual environment
 
-Pipeline
-1. Pre_process (text content)
-2. Filter: extract language, only keep English
-3. Divide train/eval/test
-4. Train model
+We strongly advise to set up a virtual experiments for these experiments.
 
-Hyperparameters
-1. Pre-trained model
-
-
-To predict on text from pretrained model
-```python
-import torch
-from transformers import AutoTokenizer
-from src.models import DimensionReductionRegressionModel
-
-path_to_model = "/path/to/model"
-model=torch.load(path)
-model.eval()
-
-path_tokenizer = "/path/to/tokenizer"
-tokenizer = AutoTokenizer.from_pretrained(path_tokenizer)
-
-input_test = "today I had lunch with friends"
-inputs = tokenizer(input_text, return_tensors="pt")
-
-with torch.no_grad():
-    output = model(**inputs)
-
-# to get last hidden state ~ embedding of dim 10
-output.get("last_hidden_state")
+```bash
+pip install -r requirements.txt
 ```
 
-
-Virtual Env
+You will also need to download additional resources from nltk in Python in your virtual environment.
+```python
 nltk.download('stopwords')
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('vader_lexicon')
-
-## Notes 2024.03.01
-
-Aim = see if latent representations of lyrics are good features to predict the popularity of a song
-Two target variables: `yt_pop_d15` and `sp_pop_d15`
-
-### 1st: Data Prepararation 
-
-(target variables should be non null, preprocessing lyrics, filtering on language, dividing training/eval/test)
-Assuming original data, stored as `table_lyrics_with_eval.csv`, is stored in `data/2024_03_01` folder
-
-1. Preprocessing `lyrics` column and saving as new file
-```bash
-python src/data_prep/pre_process.py --path data/2024_03_01/table_lyrics_with_eval.csv -c lyrics -o data/2024_03_01/pre_processed.csv
 ```
 
-2. Filtering + Adding language with transformer-based model
-```bash
-python src/data_prep/filter.py --input data/2024_03_01/pre_processed.csv --output data/2024_03_01/
-```
+## Reproducibility
+For more clarity, we describe the different scripts to run to reproduce our experiments in a separate [README](./experiments/README.md).
 
-3. Only keeping english-based models, and divide train/eval/test
-```bash
-python src/data_prep/divide_train_eval_test.py --input data/2024_03_01/filtered.csv --output data/2024_03_01/
-```
+## Structure
 
-### 2nd: Fine-tune Language Model
-We start with a generic language model, and we do domain adaptation with the lyrics
+TO-DO-G: add the notebook in `src/models`
 
-```bash
-python src/models/fine_tune_llm.py --input data/2024_03_01/filtered.csv --folder final_models/mlm-fine-tuned-roberta
-```
-
-Base model (constant during the project): `xlm-roberta-base` 
-
-At the end of this step, we have a fine-tuned LM (FT-LM), that embeds text with dimension 768
-
-### 3rd: Train various models and store embeddings
-
-For each target variable there are four possible embedding types
-
-1. 768-dimension embeddings from output of FT-LM
-2. 10-dimension embeddings from FT-LM + PCA
-(1. and 2. embeddings will be saved together)
-
-For the below examples, the target variable is `sp_pop_d15`
-
-Get the embeddings for train
-```bash
-python src/models/pca.py -bt xlm-roberta-base -bm final_models/mlm-fine-tuned-roberta/checkpoint-1107 -d data/2024_03_01/train.csv -sf embeddings/mlm-fine-tuned-roberta -td train
-```
-
-Store test embeddings
-```bash
-python src/embeddings.py --base_model final_models/mlm-fine-tuned-roberta/checkpoint-1107 --data data/2024_03_01/test.csv --save embeddings/mlm-fine-tuned-roberta/test_embeddings.npy --pca_model embeddings/mlm-fine-tuned-roberta/pca_model.joblib
-```
-
-STOPPED HERE 2024.03.01
-
-3. 10-dimension embeddings from FT-LM + Regression + PCA 
-
-Train the regression model 
-```bash
-python src/models/regression.py --train_path data/2024_03_01/train.csv --eval_path data/2024_03_01/eval.csv --config src/configs/base_regression_sp.yaml --target sp_pop_d15
-```
-
-Train the PCA
-```bash
-python src/models/pca.py -bt xlm-roberta-base -bm final_models/roberta-fine-tuned-regression-sp/checkpoint-7200 -d data/2024_03_01/train.csv -sf embeddings/sp_pop_d15/roberta-fine-tuned-regression -td train
-```
-
-Store test embeddings
-```bash
-python src/embeddings.py --base_model final_models/roberta-fine-tuned-regression-sp/checkpoint-7200 --data data/2024_03_01/test.csv --save embeddings/sp_pop_d15/roberta-fine-tuned-regression/test_embeddings.npy --pca_model embeddings/sp_pop_d15/roberta-fine-tuned-regression/pca_model.joblib
-```
-
-4. 10-dimension embeddings from FT-LM + Dimensionality Reduction + Regression 
-
-Train the regression model
-```bash
-python src/models/10_dim_regression.py --train_path data/2024_03_01/train.csv --eval_path data/2024_03_01/eval.csv --config src/configs/base_10_dim_regression_sp.yaml --target sp_pop_d15
-```
-
-Store train embeddings
-```bash
-python src/embeddings.py --base_model final_models/reduction-regression-roberta-sp/model_10_dim_reg.pth --data data/2024_03_01/train.csv --save embeddings/sp_pop_d15/reduction-regression-roberta/train_embeddings.npy 
-```
-
-Store test embeddings
-```bash
-python src/embeddings.py --base_model final_models/reduction-regression-roberta-sp/model_10_dim_reg.pth --data data/2024_03_01/test.csv --save embeddings/sp_pop_d15/reduction-regression-roberta/test_embeddings.npy 
-```
-
-### 4th: Load Embeddings and train DecisionTree Model
-
-You can use the followings (adapt it depending on your path):
-
-```python
-from joblib import load
-import numpy as np
-import pandas as pd
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
-
-pca = load("pca_model.joblib")
-data = "data/2023_09_28/train.csv"
-target = "sp_pop_d15"
-df = pd.read_csv(data)
-
-X_train = np.load(embeddings.npy)
-y_train = df[target].values.tolist()
-
-decision_tree = DecisionTreeRegressor()
-decision_tree.fit(X_train_10, y_train)
-y_pred = decision_tree.predict(X_train_10)
-
-mae = mean_absolute_error(y_train, y_pred)
-mse = mean_squared_error(y_train, y_pred)
-r2 = r2_score(y_train, y_pred)
-
-print("Mean Absolute Error (MAE):", mae)
-print("Mean Squared Error (MSE):", mse)
-print("R^2 (Coefficient of Determination):", r2)
-```
-
+Below an overview of the main content of the code, that is in the `src` folder:
+* `configs`: configuration `.yaml` files for the regression layers
+* `data_prep`: all scripts related to data preparation for model training
+* `models`: all models
+* `embeddings.py`: extract embeddings from a model
+* `features.py`: stylometric features
+* `helpers.py`: generic helpers

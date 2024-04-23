@@ -21,11 +21,7 @@ def read_csv(path: str) -> pd.DataFrame:
     return df
 
 BASE_TOKENIZER = "sentence-transformers/all-mpnet-base-v2"
-# base_model = "models/roberta-fine-tuned-regression/checkpoint-7200"
-# data = "data/2023_09_28/train.csv"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-# save_path = "embeddings.npy"
-# pca_model = "pca_model.joblib"
 BATCH_SIZE = 16
 
 

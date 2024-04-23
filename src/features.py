@@ -4,22 +4,21 @@ Extracting (traditional) features from lyrics, such as token count, etc
 
 Re-implementation from the following paper: ALF-200k: Towards Extensive Multimodal Analyses of Music Tracks and Playlists
 """
+import click
 from tqdm import tqdm
+import string
 import nltk
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.probability import FreqDist
 from nltk.corpus import stopwords
 from nltk.corpus import wordnet as wn
-import string
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from src.helpers import read_csv
 
 def preprocess_text(text):
     """ Tokenizing and removing punctuation+stopwords"""
     tokens = word_tokenize(text.lower())
     return tokens
-    # tokens = [token for token in tokens if token not in string.punctuation]
-    # stop_words = set(stopwords.words('english'))
-    # return [token for token in tokens if token not in stop_words]
 
 class LexicalFeatureExtractor:
     """ Extracting Lexical Feature """
@@ -108,13 +107,6 @@ class LinguisticFeatureExtractor:
     def __call__(self, text):
         tokens = preprocess_text(text=text)
 
-        # uncommon_words = [word for word in tokens if len(wn.synsets(word)) == 0]
-        # uncommon_words_ratio = len(uncommon_words) / len(tokens)
-        # slang_words = ['slang1', 'slang2']  # Define your list of slang words
-        # slang_words_ratio = sum(1 for word in tokens if word in slang_words) / len(tokens)
-        # pattern = r'\b(\w+)\b.*\b\1\b'
-        # echoisms = len(re.findall(pattern, text))
-
         return {
             "lemma_ratio": self.get_lemma_ratio(tokens) if tokens else 0
         }
@@ -187,26 +179,18 @@ class FeatureExtractor:
         df = df.progress_apply(self.extract_features, axis=1)
         return df
 
+
+@click.command()
+@click.argument('input_data')
+@click.argument('output_data')
+def main(input_data, output_data):
+    """ Main """
+    df = read_csv(input_data)
+    feat_extractor = FeatureExtractor()
+    df = feat_extractor(df)
+    df.to_csv(output_data)
+
+
 if __name__ == '__main__':
-    # LYRICS = """
-    # This is an example of lyrics.
-    # It had multiple lines and contains some repetition lyrics.
-    # It also includes punctuation, digits, and stopwords lyrics like the, is, and.
-    # """
-
-    # LEXICAL_FEATURES = LexicalFeatureExtractor()
-    # print(LEXICAL_FEATURES(text=LYRICS))
-
-    # LINGUISTIC_FEATURES = LinguisticFeatureExtractor()
-    # print(LINGUISTIC_FEATURES(text=LYRICS))
-
-    # SEMANTIC_FEATURES = SemanticFeatureExtractor()
-    # print(SEMANTIC_FEATURES(text=LYRICS))
-
-    # SYNTACTIC_FEATURES = SyntacticFeatureExtractor()
-    # print(SYNTACTIC_FEATURES(text=LYRICS))
-    from src.helpers import read_csv
-    DF = read_csv("data/2024_03_01/filtered.csv")
-    FEAT_EXTRACTOR = FeatureExtractor()
-    DF = FEAT_EXTRACTOR(DF)
-    DF.to_csv("./filtered_with_feats.csv")
+    # python src/features.py data/2024_03_01/filtered.csv ./filtered_with_feats.csv
+    main()
