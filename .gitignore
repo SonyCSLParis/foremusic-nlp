@@ -1,5 +1,6 @@
 **/.DS_Store
 *.csv
+*.ipynb_checkpoints
 build/
 dist/
 *.egg-info
@@ -10,3 +11,5 @@ embeddings/*
 models_old/
 final_embeddings
 final_models
+figures/
+fnlp/
