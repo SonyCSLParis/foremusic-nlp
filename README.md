@@ -1,6 +1,7 @@
 # Lyrics for success: comparing stylometric and embedding features for song popularity prediction
 
-This is the code that was submitted together with the paper at ISMIR 2024.
+This is the code that was submitted together with the paper "Lyrics for success: embedding features for song popularity prediction
+", accepted to [NLP4MusA 2024](https://sites.google.com/view/nlp4musa-2024/home), co-located with [ISMIR'2024](https://ismir2024.ismir.net).
 
 ## Set Up a virtual environment
 
@@ -33,3 +34,12 @@ Below an overview of the main content of the code, that is in the `src` folder:
 * `embeddings.py`: extract embeddings from a model
 * `features.py`: stylometric features
 * `helpers.py`: generic helpers
+
+## Acknowledgments
+
+If you use this work please cite the following paper:
+```bib
+{
+    to add when proceedings are published
+}
+```
