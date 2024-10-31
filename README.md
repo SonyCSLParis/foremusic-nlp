@@ -21,11 +21,10 @@ nltk.download('vader_lexicon')
 ```
 
 ## Reproducibility
+
 For more clarity, we describe the different scripts to run to reproduce our experiments in a separate [README](./experiments/README.md).
 
 ## Structure
-
-TO-DO-G: add the notebook in `src/models`
 
 Below an overview of the main content of the code, that is in the `src` folder:
 * `configs`: configuration `.yaml` files for the regression layers
