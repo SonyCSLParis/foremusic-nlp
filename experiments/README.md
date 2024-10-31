@@ -66,7 +66,7 @@ python experiments/concat_feats_embeddings.py ./data/2024_03_11 ./final_embeddin
 
 ## 6. Final regression models 
 
-This notebook contains the code to train a LightGBM model for predicting song popularity 15 days post-release, leveraging various groups of song features combined with lyrics features, including both stylometric information and embeddings from large language models (LLMs). The key steps in the pipeline are:
+The notebook src/models/train_test_fit.ipynb contains the code to train a LightGBM model for predicting song popularity 15 days post-release, leveraging various groups of song features combined with lyrics features, including both stylometric information and embeddings from large language models (LLMs). The key steps in the pipeline are:
 
 * Loading data collected from Spotify and the generated embeddings, then merging these datasets.
 * Setting the target variable as Spotify popularity at 15 days post-release and displaying it.
