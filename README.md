@@ -38,7 +38,28 @@ Below an overview of the main content of the code, that is in the `src` folder:
 
 If you use this work please cite the following paper:
 ```bib
-{
-    to add when proceedings are published
+@inproceedings{prevedello-etal-2024-lyrics,
+    title = "Lyrics for Success: Embedding Features for Song Popularity Prediction",
+    author = "Prevedello, Giulio  and
+      Blin, Ines  and
+      Monechi, Bernardo  and
+      Ubaldi, Enrico",
+    editor = "Kruspe, Anna  and
+      Oramas, Sergio  and
+      Epure, Elena V.  and
+      Sordo, Mohamed  and
+      Weck, Benno  and
+      Doh, SeungHeon  and
+      Won, Minz  and
+      Manco, Ilaria  and
+      Meseguer-Brocal, Gabriel",
+    booktitle = "Proceedings of the 3rd Workshop on NLP for Music and Audio (NLP4MusA)",
+    month = nov,
+    year = "2024",
+    address = "Oakland, USA",
+    publisher = "Association for Computational Lingustics",
+    url = "https://aclanthology.org/2024.nlp4musa-1.13/",
+    pages = "75--80",
+    abstract = "Accurate song success prediction is vital for the music industry, guiding promotion and label decisions. Early, accurate predictions are thus crucial for informed business actions. We investigated the predictive power of lyrics embedding features, alone and in combination with other stylometric features and various Spotify metadata (audio, platform, playlists, reactions). We compiled a dataset of 12,428 Spotify tracks and targeted popularity 15 days post-release. For the embeddings, we used a Large Language Model and compared different configurations. We found that integrating embeddings with other lyrics and audio features improved early-phase predictions, underscoring the importance of a comprehensive approach to success prediction."
 }
 ```
